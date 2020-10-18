@@ -1,0 +1,48 @@
+CC   = C:/SaturnOrbit/SH_ELF/sh-elf/bin/sh-elf-gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = init.o polygons.o SATURNBG.o $(RES)
+LINKOBJ  = init.o polygons.o SATURNBG.o $(RES)
+LIBS =  -L"C:/SaturnOrbit/SGL_302j/LIB_ELF" -L"C:/SaturnOrbit/SBL_601/SEGALIB/LIB_ELF" -L"C:/SaturnOrbit/TOOLS/BGCON" -L"C:/SaturnOrbit/RB/BUILD/Saturn/LIB_COFF" -L"C:/SaturnOrbit/DUCK/SATURN/SEGALIB/LIB" -L"C:/SaturnOrbit/DUCK/SATURN/SEGALIB/LIB" -m2 -Xlinker --format=coff-sh -Xlinker -T$(LINKFILE)  -Xlinker -Map -Xlinker $(MAPFILE) -Xlinker -e -Xlinker ___Start -nostartfiles C:/SaturnOrbit/SGL_302j/LIB_COFF/SGLAREA.O -lcd -lsgl C:/SaturnOrbit/SGL_302j/LIB_COFF/SEGA_SYS.A C:/SaturnOrbit/SBL_601/SEGALIB/LIB_ELF/sega_cmp.a C:/SaturnOrbit/TOOLS/BGCON/DEHUFF.O  
+INCS =  -I"C:/SaturnOrbit/SH_ELF/sh-elf/sh-elf/include"  -I"C:/SaturnOrbit/SGL_302j/INC"  -I"C:/SaturnOrbit/SBL_601/SEGALIB/INCLUDE"  -I"C:/SaturnOrbit/TOOLS/BGCON"  -I"C:/SaturnOrbit/RB/INC"  -I"C:/SaturnOrbit/E2"  -I"C:/SaturnOrbit/DUCK/SATURN/SEGALIB/INCLUDE" 
+CXXINCS =  -I"C:/SaturnOrbit/SH_ELF/sh-elf/include/c++/3.4-GNUSH_v0501"  -I"C:/SaturnOrbit/SGL_302j/INC"  -I"C:/SaturnOrbit/SBL_601/SEGALIB/INCLUDE"  -I"C:/SaturnOrbit/TOOLS/BGCON"  -I"C:/SaturnOrbit/RB/INC"  -I"C:/SaturnOrbit/E2"  -I"C:/SaturnOrbit/DUCK/SATURN/SEGALIB/INCLUDE" 
+BIN  = sl_elf.coff
+CXXFLAGS = $(CXXINCS) -m2 -Wno-deprecated #-fno-rtti -fno-exceptions  
+CFLAGS = $(INCS) -m2  
+RM = rm -f
+
+COMMONDIR = C:/SaturnOrbit/COMMON
+PREFIX = sl_elf
+
+OBJFILE = $(PREFIX).coff
+MAPFILE = $(PREFIX).map
+LINKFILE = $(COMMONDIR)/sl.lnk
+BINFILE = $(PREFIX).bin
+ISOFILE = $(PREFIX).iso
+IPFILE = $(COMMONDIR)/IP.BIN
+
+.PHONY: all all-before all-after clean clean-custom 
+
+all: all-before sl_elf.coff all-after  $(BINFILE) $(ISOFILE)
+
+$(BINFILE): $(OBJFILE)
+	@C:/SaturnOrbit/SH_ELF/sh-elf/bin/sh-elf-objcopy -O binary $(OBJFILE) $(BINFILE)
+
+$(ISOFILE): $(BINFILE)
+	@C:/SaturnOrbit/SH_ELF/sh-elf/bin/sh-elf-objcopy -O binary $(OBJFILE) cd/0.bin
+	@C:/SaturnOrbit/TOOLS/mkisofs -quiet -sysid "SEGA SATURN" -volid "SaturnApp" -volset "SaturnApp" -publisher "SEGA ENTERPRISES, LTD." -preparer "SEGA ENTERPRISES, LTD." -appid "SaturnApp" -abstract "ABS.TXT" -copyright "CPY.TXT" -biblio "BIB.TXT" -generic-boot $(IPFILE) -full-iso9660-filenames -o $(ISOFILE) cd  
+	
+clean: clean-custom
+	@${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	@$(CC) $(LINKOBJ) -o "sl_elf.coff" $(LIBS)
+
+init.o: init.c
+	$(CC) -c init.c -o init.o $(CFLAGS)
+
+polygons.o: polygons.c
+	$(CC) -c polygons.c -o polygons.o $(CFLAGS)
+
+SATURNBG.o: SATURNBG.C
+	$(CC) -c SATURNBG.C -o SATURNBG.o $(CFLAGS)

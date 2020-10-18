@@ -1,0 +1,7 @@
+.vscode
+cd
+sl_elf.iso
+*.o
+*bin
+*coff
+*.map
